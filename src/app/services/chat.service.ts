@@ -1,47 +1,29 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
+import { io, Socket } from 'socket.io-client';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
-  data: any;
 
-  private paramSource = new BehaviorSubject(null);
-  sharedParam = this.paramSource.asObservable();
-  
-  constructor() { }
+  private socket: Socket;
+  private url = 'http://localhost:3000'; // server local path
 
-  add(message: string) {
-    if (localStorage.getItem('chatData') == null) {
-      let chatList: string[] = [];
-      chatList.push(message);
-      localStorage.setItem('chatData', JSON.stringify(chatList));
-      // return list.length + 1;
-    } else {
-      let returnUrl: any = localStorage.getItem('chatData');
-      let chatList: string[] = JSON.parse(returnUrl);
-      chatList.push(message);
-      localStorage.setItem('chatData', JSON.stringify(chatList));
-    }
+  constructor() {
+    this.socket = io(this.url, { transports: ['websocket', 'polling', 'flashsocket'] });
   }
 
-  getAll() {
-    let returnUrl: any = localStorage.getItem('chatData');
-    
-    if (returnUrl != null) {
-      // console.log(JSON.parse(returnUrl))
-      return JSON.parse(returnUrl);
-    }
-    return null;
+  listen(eventname: string): Observable<any> {
+    return new Observable((subscriber) => {
+      this.socket.on(eventname, (data) => {
+        subscriber.next(data);
+      })
+    })
   }
 
-  sendData(data:any){
-    this.paramSource.next(data);
-
+  emit(eventname: string, data: any) {
+    this.socket.emit(eventname, data);
   }
 
-  getData(){
-    return this.data;  
-  }
 }

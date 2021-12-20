@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { io } from 'socket.io-client';
 import { ChatService } from 'src/app/services/chat.service';
 
+const SOCKET_ENDPOINT = 'localhost:3000';
 @Component({
   selector: 'app-person1',
   templateUrl: './person1.component.html',
@@ -9,35 +11,42 @@ import { ChatService } from 'src/app/services/chat.service';
 })
 export class Person1Component implements OnInit {
 
-  data: any;
-
-  chatForm: FormGroup;
-
-  Btn: boolean = false;
-
   message = '';
-  messages:any= [];
+  userName: string;
+  output: any[] = [];
+  feedback: string;
 
-  keywords = '';
-
-  constructor(private chatService: ChatService, private formBuilder: FormBuilder) { }
-
+  constructor(
+    private chatService: ChatService
+  ) {
+  }
 
   ngOnInit(): void {
-    this.chatForm = this.formBuilder.group({
-      message: ['']
-    })
 
-    this.messages = this.chatService.getAll();
-    // console.log("person1 component===>",this.messages);
-
-    this.Btn = !this.Btn;
+    this.chatService.listen('typing').subscribe((data) => this.updateFeedback(data));
+    this.chatService.listen('chat').subscribe((data) => this.updateMessage(data));
   }
 
-  submit(): void {
-    // console.log("person1===>", this.chatForm.value);
-    this.chatService.add(this.chatForm.value);
-    this.chatForm.reset();
+  messageTyping(): void {
+    this.chatService.emit('typing', this.userName);    
   }
 
+  sendMessage(): void {
+    this.chatService.emit('chat', {
+      message: this.message,
+      handle: this.userName
+    });
+    this.message = ""; 
+  }
+
+  updateMessage(data:any) {
+    this.feedback = '';
+    if(!!!data) return;
+    console.log(`${data.handle} : ${data.message}`);
+    this.output.push(data);
+  }
+
+  updateFeedback(data: any){
+    this.feedback = `${data} is typing a message`;
+  }
 }

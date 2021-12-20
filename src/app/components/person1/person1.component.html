@@ -1,4 +1,4 @@
-<div class="container" fxLayout="row" fxLayoutAlign="center center">
+<!-- <div class="container" fxLayout="row" fxLayoutAlign="center center">
   <mat-card class="card">
     <div class="row" fxLayoutGap="10px">
       <div>
@@ -29,11 +29,33 @@
       </div>
     </mat-card-content>
     <mat-card-footer>
-      <form [formGroup]="chatForm" (submit)="submit()" fxLayout="row" autocomplete="off">
-        <input class="form-control" formControlName="message" name="message" placeholder="Write a message"
-          [value]="message" (change)="(message)" />
-        <mat-icon class="sendBtn" (click)="submit()">send</mat-icon>
+      <form [formGroup]="chatForm" (submit)="sendMessage()" fxLayout="row" autocomplete="off">
+        <input class="form-control" formControlName="message" name="message" [(ngModel)]="message" placeholder="Write a message"
+         (keypress)="messageTyping()" />
+          <button id="send" (click)="sendMessage()">
+        <mat-icon class="sendBtn">send</mat-icon></button>
       </form>
     </mat-card-footer>
   </mat-card>
-</div>
+</div> -->
+
+<mat-card id="chat-applicaton">
+  <h2>Chat Application</h2>
+  <div id="chat-window">
+    <div id="output" *ngFor="let data of output; let even = even; let odd = odd;"
+      [ngClass]="{ oddMsg: odd, evenMsg: even }">
+      <p><strong>{{data.handle}} : </strong>{{data.message}}</p>
+    </div>
+    <div id="feedback">
+      <p>{{feedback}}</p>
+    </div>
+  </div>
+  <input id="handle" type="text" [(ngModel)]="userName" placeholder="Handle" />
+  <div fxLayout="row">
+    <input id="message" type="text" [(ngModel)]="message" placeholder="Message" autocomplete="off"
+      (keypress)="messageTyping()" />
+    
+      <mat-icon class="sendBtn" id="send" style="cursor: pointer;" (click)="sendMessage()">send</mat-icon>
+    
+  </div>
+</mat-card>
